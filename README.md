@@ -1,3 +1,24 @@
+## Problem
+
+Interior design projects often require significant back-and-forth between clients and designers before the actual design process begins. Designers need to understand client preferences, budget, materials, fixtures, and other project requirements, while clients may struggle to communicate these preferences clearly.
+
+AlignSpace explores how AI can make this discovery and handoff process more structured by helping translate client conversations and preferences into actionable project information for designers.
+
+## What It Does
+
+AlignSpace is an AI-assisted interior design platform with separate client and designer experiences.
+
+### Client Experience
+- Complete project discovery through a conversational interface
+- Communicate design preferences and project requirements
+- Explore design directions and material selections
+- Review selections and hand off the project to a designer
+
+### Designer Experience
+- View client projects and project details
+- Review collected preferences, design directions, and material selections
+- Continue the design process using structured information collected during client discovery
+
 # AlignSpace — AI Pipeline service (`as-ai-server`)
 
 **Owner:** Engineer 3 (AI & Agentic Pipeline) · **Status:** running end to end, verified on the live Claude API · 17 tests passing
