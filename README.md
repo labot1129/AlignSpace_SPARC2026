@@ -1,23 +1,186 @@
+# AlignSpace
+
+**AI-Assisted Interior Design Discovery & Designer Handoff Platform**
+
+AlignSpace is a collaborative UPenn SPARC project exploring how AI-assisted workflows can help turn ambiguous client design preferences into structured, actionable information for interior designers.
+
+> **Team Project — UPenn SPARC 2026**  
+> My primary role: Frontend Engineering, Product/UX, and Frontend–Backend Integration
+
+---
+
 ## Problem
 
-Interior design projects often require significant back-and-forth between clients and designers before the actual design process begins. Designers need to understand client preferences, budget, materials, fixtures, and other project requirements, while clients may struggle to communicate these preferences clearly.
+Interior design projects often require significant back-and-forth before the actual design process begins.
 
-AlignSpace explores how AI can make this discovery and handoff process more structured by helping translate client conversations and preferences into actionable project information for designers.
+Designers need to understand a client's style preferences, functional requirements, budget, materials, fixtures, and project constraints. Clients, however, may struggle to communicate these preferences clearly or translate inspiration into concrete design decisions.
+
+AlignSpace explores how AI-assisted workflows can make this discovery process more structured and create a clearer handoff between clients and designers.
+
+---
 
 ## What It Does
 
-AlignSpace is an AI-assisted interior design platform with separate client and designer experiences.
+AlignSpace provides separate experiences for clients and designers.
 
 ### Client Experience
+
+Clients can:
+
 - Complete project discovery through a conversational interface
-- Communicate design preferences and project requirements
-- Explore design directions and material selections
-- Review selections and hand off the project to a designer
+- Communicate style preferences and functional requirements
+- Explore generated design directions
+- Review material and fixture selections
+- Track project budget information
+- Confirm selections and hand the project off to a designer
 
 ### Designer Experience
-- View client projects and project details
-- Review collected preferences, design directions, and material selections
-- Continue the design process using structured information collected during client discovery
+
+Designers can:
+
+- View incoming client projects from a project dashboard
+- Review project requirements and collected preferences
+- Review selected design directions and material selections
+- Access structured project information collected during discovery
+- Continue the professional design process from the client handoff
+
+---
+
+## My Contributions
+
+I worked primarily on the frontend and product experience for AlignSpace, translating the team's AI-assisted workflow into usable client- and designer-facing experiences.
+
+My contributions included:
+
+- Built client- and designer-facing interfaces using **Next.js, React, TypeScript, and Tailwind CSS**
+- Developed the conversational discovery interface, including message threads, preference chips, image-upload interactions, design-direction selection, and project-cost displays
+- Built the **Designer Projects dashboard** and project-detail experiences for reviewing client projects and material selections
+- Integrated frontend workflows with team-developed **FastAPI REST APIs**
+- Implemented authentication and role-aware client/designer application flows using **Clerk**
+- Worked across frontend/backend boundaries to align API response structures with UI requirements and troubleshoot integration issues
+- Contributed product and UX decisions based on real-world interior-design workflows and translated those workflows into software requirements
+
+---
+
+## Tech Stack
+
+### Frontend
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+### Backend & APIs
+- FastAPI
+- REST APIs
+
+### AI Pipeline
+- Anthropic Claude
+- Structured AI outputs
+- Multi-stage design recommendation pipeline
+- Deterministic fallback for offline development and testing
+
+### Data & Infrastructure
+- PostgreSQL
+- Redis
+- Socket.io
+- Docker
+
+### Product & Analytics
+- Clerk
+- PostHog
+
+---
+
+## System Overview
+
+At a high level, AlignSpace connects a conversational client experience with a structured AI-assisted design pipeline and a professional designer handoff.
+
+```text
+Client
+  │
+  ▼
+Next.js Client Experience
+  │
+  │  project information
+  │  preferences
+  │  conversation
+  ▼
+Backend / FastAPI
+  │
+  ▼
+AI Pipeline
+  │
+  ├── Intent Extraction
+  ├── Design Direction Matching
+  ├── Selection Assembly
+  ├── Budget Validation
+  └── Document Generation
+  │
+  ▼
+Structured Project Data
+  │
+  ├──────────────► Client Review
+  │
+  └──────────────► Designer Dashboard
+```
+
+The AI pipeline converts conversational and structured client inputs into design directions, material selections, budget information, and a designer-ready project package.
+
+The production MVP intentionally uses a lean sequential pipeline. More complex capabilities such as embedding-based memory retrieval and a LangGraph orchestration layer were considered as future architecture rather than represented as completed MVP functionality.
+
+---
+
+## Key Engineering Challenges
+
+### Frontend–Backend Integration
+
+One of my main challenges was coordinating frontend requirements with backend API development across a team.
+
+The client and designer experiences depended on project, preference, material, message, and handoff data produced by different parts of the system. This required aligning API response structures with frontend state and UI requirements while debugging integration issues as the system evolved.
+
+### Translating AI Output Into Product Experiences
+
+The frontend could not simply display raw model output.
+
+AI-generated information needed to become understandable product components such as design-direction cards, material selections, project summaries, budget information, and designer-facing project data.
+
+This required thinking about both the structure of the AI output and how users would interact with it.
+
+### Designing Across Two User Roles
+
+AlignSpace supports two connected but different workflows:
+
+**Client → discovery and decision making**
+
+**Designer → project review and professional continuation**
+
+The frontend therefore needed role-aware navigation, authentication, interfaces, and handoff behavior while maintaining continuity between both sides of the project.
+
+---
+
+## What I Learned
+
+This project gave me practical experience working at the intersection of frontend engineering, AI-enabled product development, and backend integration.
+
+In particular, I gained experience with:
+
+- Designing interfaces around structured AI outputs
+- Integrating frontend applications with REST APIs
+- Coordinating frontend and backend development in a team environment
+- Designing role-aware product workflows
+- Debugging application state and integration issues
+- Translating domain-specific workflows into software requirements
+
+It also showed me that building an AI product involves much more than calling an LLM: the model output must fit into reliable APIs, application state, user workflows, persistence, testing, and a usable product experience.
+
+---
+
+# Technical Documentation
+
+The following section contains the team's detailed documentation for the AlignSpace AI pipeline.
+
+---
 
 # AlignSpace — AI Pipeline service (`as-ai-server`)
 
@@ -47,12 +210,13 @@ cd as-ai-server
 
 # Fast path — just the packages this service uses (seconds):
 pip install fastapi uvicorn pydantic anthropic pytest httpx
-# Full team environment (also pulls heavier ML libs for the future memory agent; slower):
-#   pip install -r requirements.txt
 
-python demo.py                                         # watch the whole flow run
-pytest                                                 # run the 17-test suite
-uvicorn main:app --app-dir src --reload --port 8000    # run the API, docs at /docs
+# Full team environment (also pulls heavier ML libs for the future memory agent; slower):
+# pip install -r requirements.txt
+
+python demo.py
+pytest
+uvicorn main:app --app-dir src --reload --port 8000
 ```
 
 **What a correct run looks like:** for the sample "calm spa-like, warm, minimal"
@@ -64,11 +228,11 @@ reads `within`. The over-budget sample (a roomy, luxe-leaning project) flips to
 
 Intent extraction uses a deterministic keyword fallback by default, so demos and
 CI never need a key. To use the real model, set the key in your shell before
-running (the reliable way — don't commit it anywhere):
+running:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-python demo.py        # intent extraction now routes through Claude
+python demo.py
 ```
 
 `.env.example` documents the variable name; copy it to `.env` to keep your key
@@ -82,7 +246,7 @@ handy. `GET /health` reports which path is live (`"intent_source": "claude"` vs
 Input is a `ClientBrief`. It flows through 5 agents and comes out as a
 `RenovationPackage`:
 
-```
+```text
 ClientBrief  (chat text + chips + budget band + room sqft)
    │
    ▼
@@ -103,6 +267,7 @@ ClientBrief  (chat text + chips + budget band + room sqft)
 ```
 
 The flow is **two-phase**, matching the product:
+
 - **Phase A (`/intake`)** runs agents 1 + 3 → shows the client 6 directions.
 - **Phase B (`/assemble`)** runs agents 4 → 5 → 6 on the direction they tapped.
 
@@ -129,21 +294,28 @@ can show "Extracting intent… / Matching presets…" live over Socket.io.
 Example:
 
 ```bash
-curl -X POST http://localhost:8000/intake -H "Content-Type: application/json" -d '{
-  "firm_id": "firm_demo",
-  "project_id": "proj_001",
-  "room_sqft": 45,
-  "budget_band": "medium",
-  "priorities": ["more storage"],
-  "style_chips": ["warm", "minimal"],
-  "chat_text": "calm spa-like bathroom, natural wood, walk-in shower, timeless"
-}'
+curl -X POST http://localhost:8000/intake \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firm_id": "firm_demo",
+    "project_id": "proj_001",
+    "room_sqft": 45,
+    "budget_band": "medium",
+    "priorities": ["more storage"],
+    "style_chips": ["warm", "minimal"],
+    "chat_text": "calm spa-like bathroom, natural wood, walk-in shower, timeless"
+  }'
 ```
 
 Request/response shapes live in `src/api_schemas.py` (wire models) and
-`src/pipeline/models.py` (internal contracts). Two example responses are checked
-in: `sample_deliverable.md` (within budget) and `sample_deliverable_over_budget.md`
-(over budget + swaps). Full interactive docs at `/docs`.
+`src/pipeline/models.py` (internal contracts).
+
+Two example responses are checked in:
+
+- `sample_deliverable.md`
+- `sample_deliverable_over_budget.md`
+
+Full interactive docs are available at `/docs`.
 
 ---
 
@@ -161,73 +333,91 @@ it is not a replacement for the backend's own routes (auth, projects, billing).
 
 ---
 
-## Architecture note for the team: lean now, LangGraph-ready later
+## Architecture Note: Lean Now, LangGraph-Ready Later
 
 `Architecture.md` describes a full LangGraph + Celery + Redis + pgvector +
-OpenAI-embeddings stack. That's the **target**. The MVP is built leaner, for two
-reasons:
+OpenAI-embeddings stack. That's the **target architecture**, not the current MVP.
 
-1. The repo's own `requirements.txt` is already lean — `anthropic`, `fastapi`,
-   `chromadb`; **no** `langgraph`, `celery`, `redis`, or `pgvector` yet.
-2. The MVP Definition explicitly **cuts** memory lookup, embeddings, vision, and
-   the multi-loop optimizer.
+The MVP is built leaner for two reasons:
 
-So this is a clean sequential runner where **each agent is a pure, testable
-node**. Promoting it to LangGraph later just means registering these same
-functions as graph nodes; wrapping Phase B in a Celery task is a few lines. The
-agent logic doesn't change either way. **Worth a 5-minute team decision: confirm
-we're MVP-lean before anyone stands up the heavier infra.**
+1. The repository's current requirements are intentionally lean and do not yet
+   include LangGraph, Celery, Redis, or pgvector for this pipeline.
+2. The MVP definition explicitly cuts memory lookup, embeddings, vision, and the
+   multi-loop optimizer.
+
+The current implementation therefore uses a clean sequential runner where each
+agent is a pure, testable node.
+
+A future LangGraph implementation could register these functions as graph nodes
+without requiring the underlying agent logic to be rewritten.
 
 ---
 
-## File map
+## File Map
 
-```
+```text
 as-ai-server/
-  Dockerfile               # used by app.yaml; serves uvicorn on :8000
-  requirements.txt         # (unchanged from the repo)
-  pytest.ini               # puts src/ on the path for tests
-  demo.py                  # runnable end-to-end example (offline-friendly)
-  .env.example             # documents ANTHROPIC_API_KEY (never commit the real one)
+  Dockerfile
+  requirements.txt
+  pytest.ini
+  demo.py
+  .env.example
   src/
-    main.py                # FastAPI app: /health + pipeline routes
-    api_schemas.py         # Pydantic wire models (the HTTP contract)
+    main.py
+    api_schemas.py
     pipeline/
-      models.py            # shared data contracts (the API everyone codes to)
-      presets.py           # 6 directions + tiered material catalog (seed data)
-      pipeline.py          # orchestrator + stage events (LangGraph-ready)
+      models.py
+      presets.py
+      pipeline.py
       agents/
-        intent.py          # [1] Claude intent extraction + offline fallback
-        matching.py        # [3] rank the 6 directions
-        assembly.py        # [4] build package, confidence scoring, flagging
-        budget.py          # [5] budget check + cheaper-swap alternatives
-        document.py        # [6] assemble the deliverable (markdown/JSON)
+        intent.py
+        matching.py
+        assembly.py
+        budget.py
+        document.py
   tests/
-    conftest.py            # forces offline extraction so tests are hermetic
-    test_pipeline.py       # core logic, incl. regression guards (offline)
-    test_api.py            # HTTP contract via TestClient
-  sample_deliverable.md            # example output: within budget (Japandi)
-  sample_deliverable_over_budget.md# example output: over budget + swaps
+    conftest.py
+    test_pipeline.py
+    test_api.py
+  sample_deliverable.md
+  sample_deliverable_over_budget.md
 ```
 
-The test suite never calls the live API (a fixture strips the key), so it runs
-the same fast, deterministic way on every machine and in CI. The Claude path is
-validated by hand via `python demo.py`.
+The test suite never calls the live API. A fixture strips the API key so tests
+run through the deterministic fallback, keeping CI fast and reproducible.
+
+The Claude path can be validated separately through:
+
+```bash
+python demo.py
+```
 
 ---
 
-## Status & next steps
+## Status & Next Steps
 
-Covers the Engineer 3 line through **Week 3**: agent contracts, the working
-pipeline, and the **intent extraction agent** — now running end to end as a
-FastAPI service, verified on the live model, with tests and a Dockerfile that fit
-the repo.
+The current AI pipeline covers:
 
-**Next:** wire `on_stage` to real Redis pub/sub once Eng 4's Redis is up; replace
-the seed catalog with Laura's real per-firm material list; (post-MVP) add the
-memory-lookup agent.
+- Structured agent contracts
+- Intent extraction
+- Design-direction matching
+- Selection assembly
+- Budget validation
+- Document generation
+- FastAPI endpoints
+- Deterministic offline fallback
+- Automated pipeline/API tests
+- Dockerized service setup
 
-**Pricing caveat:** all cost numbers are **materials-only illustrative ranges,
-not quotes**. Price per item, quantities from room size, designer sets the final
-number (per the team's intake discussion). Seed prices are placeholders for the
-real material list.
+Potential future work includes:
+
+- Persisting more generated project data across the complete client → designer workflow
+- Adding embedding-based memory retrieval
+- Introducing LangGraph orchestration where more complex stateful agent behavior becomes useful
+- Connecting pipeline progress events to real-time infrastructure
+- Replacing seed material data with production-ready catalogs
+- Expanding AI evaluation and regression testing
+
+> **Pricing note:** Cost estimates in the current MVP are illustrative material
+> ranges rather than professional quotes. Final project pricing remains part of
+> the designer workflow.
